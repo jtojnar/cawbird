@@ -547,6 +547,7 @@ call_done_cb (GObject      *source_object,
               GAsyncResult *result,
               gpointer      user_data)
 {
+  g_debug("call_done_cb");
   RestProxyCall *call = REST_PROXY_CALL (source_object);
   GTask *task = user_data;
   GError *error = NULL;
@@ -589,6 +590,7 @@ cb_utils_load_threaded_async  (RestProxyCall       *call,
                                GAsyncReadyCallback  callback,
                                gpointer             user_data)
 {
+  g_debug("Cancellable? %s", cancellable == NULL ? "null" : (g_cancellable_is_cancelled(cancellable) ? "cancelled" : "not cancelled"));
   GTask *task = g_task_new (call, cancellable, callback, user_data);
 
 #ifdef DEBUG
@@ -600,6 +602,7 @@ cb_utils_load_threaded_async  (RestProxyCall       *call,
 #endif
 
   rest_proxy_call_invoke_async (call, cancellable, call_done_cb, task);
+  g_debug("cb_utils_load_threaded_async fired");
 }
 
 JsonNode *

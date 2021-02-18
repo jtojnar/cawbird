@@ -705,12 +705,25 @@ namespace TweetUtils {
     init_call.add_param("total_bytes", media_upload.filesize.to_string());
     init_call.add_param("media_type", media_upload.filetype);
     init_call.add_param("media_category", media_upload.media_category);
-    Json.Node root;
-    try {
-      root = yield Cb.Utils.load_threaded_async(init_call, cancellable);
-      debug("Completed call");
-    }
-    catch (GLib.Error e) {
+    Json.Node root = null;
+    GLib.Error e = null;
+    Cb.Utils.load_threaded_async.begin(init_call, cancellable, (_, res) => {
+      debug("Call returned");
+      try {
+        root = Cb.Utils.load_threaded_async.end(res);
+        debug("Returned root");
+      }
+      catch (GLib.Error e_) {
+        debug("ERROR! %s", e_.message);
+        e = e_;
+      }
+      upload_media.callback();
+    });
+    debug("Invoked");
+    yield;
+    debug("Completed call");
+
+    if (e != null) {
       var err = TweetUtils.failed_request_to_error (init_call, e);
       warning("INIT failed - %s", err.message);
       media_upload.progress_complete(err);
